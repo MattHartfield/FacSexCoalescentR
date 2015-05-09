@@ -6,7 +6,7 @@ EXECUTION
 
 The script is meant to be run via a command-line. The command ‘Rscript’ therefore needs to be used. The general syntax is as follows: all commands are obligatory.
 
-Rscript AsexCoalescentSim.R N GC Theta SwitchingType pLH pHL M Demes <Rates per deme> Reps
+Rscript AsexCoalescentSim.R N GC Theta SwitchingType pLH pHL M Demes [Rates per deme] Reps
 
 Each command is defined as follows:
 
@@ -25,7 +25,7 @@ Each command is defined as follows:
 - M = 2Nm is the net migration rate between demes, for m between 0 and 1. If there only exists one deme, then M is internally set to zero as a precaution.
 - Demes are the number of subpopulations present. Set to 1 to define a single panmictic population.
 
-<Rates per deme> are a set of 4*Demes parameters, which together determine how sex is defined within each deme. Together they allow the user to define both temporal and spatial changes in sex rates over time, if desired. For each deme four parameters are defined as follows.
+[Rates per deme] are a set of 4*Demes parameters, which together determine how sex is defined within each deme. Together they allow the user to define both temporal and spatial changes in sex rates over time, if desired. For each deme four parameters are defined as follows.
 - Number of paired, within-individual samples present in that deme at the present time (note that each sample equates to two separate samples, one from each gene copy within an diploid individual)
 - Number of unique, single samples from individuals in that deme at the present time
 - The ‘Low’ rate of sex in that deme
