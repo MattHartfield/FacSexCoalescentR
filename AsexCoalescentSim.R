@@ -666,6 +666,7 @@ restore_rng <- function(savefile) {
 seed <- as.integer(runif(1,min=0,max=1000000))
 print(seed)
 write.table(as.matrix(seed),file="Seed.out",quote=F,row.names=F,col.names=F)
+set.seed(seed)
 for(i in 1:Nreps){
 	# cat("Run ",i,":\n",sep='')
 	if(pSTIN == 0){
