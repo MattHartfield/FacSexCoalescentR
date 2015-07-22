@@ -29,8 +29,9 @@ if(d == 1){
 }
 
 # Initial Error checking
-if(g < 0 || g > 1){
+if(g < 0){
 	stop("Rate of gene conversion has to be positive or 0.")
+}
 if(theta < 0){
 	stop("Mutation rate must be a positive (or zero) value.")
 }
@@ -40,7 +41,7 @@ if(d <= 0){
 if(pSTIN != 1){
 	if( any( c(pHL,pLH) < 0) || any( c(pHL,pLH) > 1)  ){
 	stop("Sex transition probabilities have to lie between 0 and 1 (if there is no stepwise change in sex).")
-}
+	}
 }
 if( any( c(pHL,pLH) == 0) && pSTIN == 0){
 	stop("Sex transition probabilities have to lie between 0 and 1.")
@@ -59,11 +60,11 @@ Iwith <- as.integer(sps[seq(1,4*d-3,by=4)])
 Ibet <- as.integer(sps[seq(2,4*d-2,by=4)])
 Itot <- (2*sum(Iwith) + sum(Ibet))
 Iindv <- sum(Iwith) + sum(Ibet)
-sexL <- sps[seq(3,4*d-1,by=4)]
-sexH <- sps[seq(4,4*d,by=4)]
+sexL <- as.double(sps[seq(3,4*d-1,by=4)])
+sexH <- as.double(sps[seq(4,4*d,by=4)])
 # Rescaling Sex rates so scaled by PER DEME population size (rather than WHOLE POPULATION - important when summing events!)
-sexL <- sexL/d
-sexH <- sexH/d
+sexL <- (sexL/d)
+sexH <- (sexH/d)
 
 ## Number of samples/reps to take
 Nreps <- as.integer(args[4*d + 8])
@@ -104,10 +105,10 @@ P9 <- function(x,g){g*x}				# Paired sample coaleses via gene conversion: (x,y) 
 P10 <- function(x,y,mig){mig*(x + y)}		# A sample migrates to another deme
 
 # Updated function to calculate probability change vectors each time OVER EACH DEME
-probset2 <- function(g,mig,Nwith,Nbet){
+probset2 <- function(g,sexin,mig,Nwith,Nbet){
 	pr <- matrix(data=0,nrow=7,ncol=d)		# Matrix of probabilities, if k splits per deme already determined
 		
-	pr[1,] <- mapply(P1,Nwith)
+	pr[1,] <- mapply(P1,sexin,Nwith)
 	pr[2,] <- mapply(P56,Nbet)
 	pr[3,] <- mapply(P56,Nbet)
 	pr[4,] <- mapply(P7,Nwith)
@@ -119,7 +120,7 @@ probset2 <- function(g,mig,Nwith,Nbet){
 }	# End of 'probset2' function
 
 # Updated function to determine how to change state numbers following 'an event', taking into account events over all demes
-stchange2 <- function(ev,deme){
+stchange2 <- function(ev){
 	
 	## Now deciding extra events depending on deme and event
 	oo3 <- switch(ev,
@@ -131,10 +132,8 @@ stchange2 <- function(ev,deme){
 	c(-1,1),
 	c(0,0)
 	)
-	oo1[deme] <- oo3[1]
-	oo2[deme] <- oo3[2]
 	
-	outlist <- list("WCH" = oo1, "BCH" = oo2)
+	outlist <- list("WCH" = oo3[1], "BCH" = oo3[2])
 	return(outlist)
 }	# End of 'stchange' function
 
@@ -243,7 +242,6 @@ cchange  <- function(tab,csamp,par,Tt){		# Renumbering tables after coalescent e
 }	# End of 'cchange' function
 
 # Function to change status of samples following event change
-indvs <- coalesce(indvs,Ttot,Nwith,Nbet,deme,event,drec,e2)
 coalesce <- function(itab,Tt,Nwith,Nbet,din,exin,dein,e2in){
 	
 	deme <- din
@@ -597,19 +595,17 @@ for(i in 1:Nreps){
 	while(Ntot > 1){	# Repeat until all samples coalesce to one MRCA
 		
 		# Setting up vector of state-change probabilities 
-		probs <- probset2(g,mig,Nwith,Nbet)
+		probs <- probset2(g,sexC,mig,Nwith,Nbet)
 		psum <- sum(probs)	# Sum of all event probabilites, for drawing random time
-		if(psum > 1){
-			stop("Summed probabilities exceed one, you need to double-check your algebra.")
-		}
 		if(psum <= 0 && all(sexC==0)!=1){
-			stop("Summed probabilites are zero or negative, you need to double-check your algebra.")
+			stop("Summed events are zero or negative, you need to double-check your algebra.")
 		}
 		
 		# Drawing time to next event, SCALED TO 2NT GENERATIONS
-		if(psum == 1){
-			tjump <- 0
-		}else if(psum == 0){
+#		if(psum == 1){
+#			tjump <- 0
+#		}else 
+		if(psum == 0){
 			tjump <- Inf
 		}else{
 			tjump <- rexp(1, rate = psum)
@@ -636,9 +632,9 @@ for(i in 1:Nreps){
 			deme <- match(1,draw2)
 			
 			# Based on outcome, altering states accordingly
-			ot <- stchange2(event,deme)
-			Nwith <- Nwith + ot$WCH
-			Nbet <- Nbet + ot$BCH
+			ot <- stchange2(event)
+			Nwith[deme] <- Nwith[deme] + ot$WCH
+			Nbet[deme] <- Nbet[deme] + ot$BCH
 			Ntot <- 2*sum(Nwith) + sum(Nbet)
 			if(event == 7){	# Choosing demes to swap if there is a migration!
 				if(d > 2){

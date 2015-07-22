@@ -71,8 +71,8 @@ Iwith <- as.integer(sps[seq(1,4*d-3,by=4)])
 Ibet <- as.integer(sps[seq(2,4*d-2,by=4)])
 Itot <- (2*sum(Iwith) + sum(Ibet))
 Iindv <- sum(Iwith) + sum(Ibet)
-sexL <- sps[seq(3,4*d-1,by=4)]
-sexH <- sps[seq(4,4*d,by=4)]
+sexL <- as.double(sps[seq(3,4*d-1,by=4)])
+sexH <- as.double(sps[seq(4,4*d,by=4)])
 
 ## Number of samples/reps to take
 Nreps <- as.integer(args[4*d + 9])
