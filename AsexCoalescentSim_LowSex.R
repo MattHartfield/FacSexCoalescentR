@@ -242,7 +242,7 @@ cchange  <- function(tab,csamp,par,Tt){		# Renumbering tables after coalescent e
 }	# End of 'cchange' function
 
 # Function to change status of samples following event change
-coalesce <- function(itab,Tt,Nwith,Nbet,din,exin,dein,e2in){
+coalesce <- function(itab,Tt,Nwith,Nbet,din,exin,dein,e2in,dt){
 	
 	deme <- din
 	ex <- exin
@@ -252,8 +252,10 @@ coalesce <- function(itab,Tt,Nwith,Nbet,din,exin,dein,e2in){
 	CT <- Ctab(itab)
 	
 	switch(ex,
-	{	# Event 1: 2k new samples created from paired samples (k = 0 in this program)
-		rsex <- sexsamp(WH,1)
+	{	# Event 1: 2 new samples created from paired sample
+		ky <- rep(0,dt)
+		ky[deme] <- 1
+		rsex <- sexsamp(WH,ky)
 		WH[WH[,2]%in%rsex,3] <- 1	# Setting samples as 'between-host' (due to split)
 	},	
 	{	# Event 5: Two pre-existing unique samples re-create paired sample.
@@ -630,6 +632,7 @@ for(i in 1:Nreps){
 			event <- match(1,draw)
 			draw2 <- rmultinom(1,1,probs[event,])[,1]
 			deme <- match(1,draw2)
+			c(event,deme);
 			
 			# Based on outcome, altering states accordingly
 			ot <- stchange2(event)
@@ -654,7 +657,9 @@ for(i in 1:Nreps){
 			}
 			
 			# Changing ancestry accordingly
-			indvs <- coalesce(indvs,Ttot,Nwith,Nbet,deme,event,drec,e2)
+			itot <- indvs
+			indvs <- coalesce(indvs,Ttot,Nwith,Nbet,deme,event,drec,e2,d)
+			indvs;
 		}
 	}
 	
