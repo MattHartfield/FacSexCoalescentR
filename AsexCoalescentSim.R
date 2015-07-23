@@ -713,10 +713,10 @@ for(i in 1:Nreps){
 		psum <- (1-nosex) + nosex*sum(probs)	# Sum of all event probabilites, for drawing random time
 		# print(c(sexC,psum))
 		if(psum > 1){
-			stop("Summed probabilities exceed one, you need to double-check your algebra.")
+			stop("Summed probabilities exceed one, you need to double-check your algebra (or probability inputs).")
 		}
 		if(psum <= 0 && all(sexC==0)!=1){
-			stop("Summed probabilites are zero or negative, you need to double-check your algebra.")
+			stop("Summed probabilites are zero or negative, you need to double-check your algebra (or probability inputs).")
 		}
 		
 		# Drawing time to next event, SCALED TO 2NT GENERATIONS

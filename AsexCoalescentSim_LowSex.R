@@ -2,7 +2,7 @@
 ## Coalescent simulation with infrequent rates of sex
 ## Simulation originally written for use in Hartfield, Wright and Agrawal 2015 paper
 ## "Coalescent times and patterns of genetic diversity in species with facultative sex: effects of gene conversion, population structure and heterogeneity".
-## This version only considers low rates of sex (2Nsigma ~ O(1); i.e. no obligate-type sex cases)
+## This version only considers low rates of sex (2Nsigma ~ O(1); i.e. no obligate-sex type cases)
 
 ## Comments should be sent to Matthew Hartfield (matthew.hartfield@utoronto.ca)
 
@@ -17,7 +17,7 @@ args <- commandArgs(trailingOnly = TRUE)
 
 ## Variables:
 ## THE FIRST SEVEN are; gen. conv.; theta; initial state; low->high sex prob; high->low sex prob; net migration rate; # demes.
-g <- as.double (args[1])	# Rate of gene conversion (2 N g)
+g <- as.double (args[1])	# Rate of gene conversion (2 NT g)
 theta <- as.double(args[2])	# Rate of mutation (4 NT mu)
 pSTIN <- as.double(args[3])	# What to do (0 = changing sex, 1 = stepwise change, 2 = constant sex)
 pLH <- as.double(args[4])	# Prob of low-sex to high-sex transition OR time of transition if stepwise change
@@ -39,8 +39,8 @@ if(d <= 0){
 	stop("Number of demes has to be a positive integer")
 }
 if(pSTIN != 1){
-	if( any( c(pHL,pLH) < 0) || any( c(pHL,pLH) > 1)  ){
-	stop("Sex transition probabilities have to lie between 0 and 1 (if there is no stepwise change in sex).")
+	if( any( c(pHL,pLH) < 0) ){
+	stop("Sex transition rates have to lie above 0 (if there is no stepwise change in sex).")
 	}
 }
 if( any( c(pHL,pLH) == 0) && pSTIN == 0){
@@ -62,9 +62,6 @@ Itot <- (2*sum(Iwith) + sum(Ibet))
 Iindv <- sum(Iwith) + sum(Ibet)
 sexL <- as.double(sps[seq(3,4*d-1,by=4)])
 sexH <- as.double(sps[seq(4,4*d,by=4)])
-# Rescaling Sex rates so scaled by PER DEME population size (rather than WHOLE POPULATION - important when summing events!)
-sexL <- (sexL/d)
-sexH <- (sexH/d)
 
 ## Number of samples/reps to take
 Nreps <- as.integer(args[4*d + 8])
@@ -95,12 +92,11 @@ Twees <- vector(mode="character",length=Nreps) # Newick tree data per run
 AllM <- vector("list", Nreps)	# List of mutation matrices
 
 # Defining functions of each transition, for rapid per-deme calculations, changed to consider low-sex case
-# Probabilities scaled for now by 2Na i.e. twice the within-deme pop size
-# NOTE FOR NOW, DO I NEED TO CONSIDER SCAlING BY PER-DEME N OR WHOLE POPULATION N?
+# Probabilities scaled by 2NT i.e. twice the total pop size
 P1 <- function(x,sexin){sexin*x}	# A paired samples splits by sex: (x,y) -> (x - 1, y + 2)
-P56 <- function(y){choose(y,2)}	# Two pre-existing unique samples re-create a paired sample: (x,y) -> (x + 1, y - 2). OR Two pre-existing paired samples coalesce: (x,y) -> (x, y - 1)
-P7 <- function(x){2*choose(x,2)}	# Two remaining paired samples doubly coalesce asexually: (x,y) -> (x-1,y)
-P8 <- function(x,y){2*x*y}			# One of the x remaining paired samples coalesce with a unique sample: (x,y) -> (x,y-1)
+P56 <- function(y){d*choose(y,2)}	# Two pre-existing unique samples re-create a paired sample: (x,y) -> (x + 1, y - 2). OR Two pre-existing paired samples coalesce: (x,y) -> (x, y - 1)
+P7 <- function(x){2*d*choose(x,2)}	# Two remaining paired samples doubly coalesce asexually: (x,y) -> (x-1,y)
+P8 <- function(x,y){2*x*y*d}			# One of the x remaining paired samples coalesce with a unique sample: (x,y) -> (x,y-1)
 P9 <- function(x,g){g*x}				# Paired sample coaleses via gene conversion: (x,y) -> (x-1,y+1)
 P10 <- function(x,y,mig){mig*(x + y)}		# A sample migrates to another deme
 
@@ -502,7 +498,8 @@ rate_change <- function(pST,pLH,pHL,sexH,sexL,switch1){
 	if(pST == 0){
 		sexCN <- sexL
 		while(is.na(tts) == 1){
-			tts <- rgeom(1, pLH/(1+pLH))
+#			tts <- rgeom(1, pLH/(1+pLH))
+			tts <- rexp(1, pLH)
 			if(is.na(tts) == 1){
 				cat("WARNING: Jump time was set to NA - transition probabilities may be too small.\n")
 			}
@@ -511,7 +508,8 @@ rate_change <- function(pST,pLH,pHL,sexH,sexL,switch1){
 	}else if(pST == 1){
 		sexCN <- sexH
 		while(is.na(tts) == 1){
-			tts <- rgeom(1, pHL/(1+pHL))
+#			tts <- rgeom(1, pHL/(1+pHL))
+			tts <- rexp(1, pHL)
 			if(is.na(tts) == 1){
 				cat("WARNING: Jump time was set to NA - transition probabilities may be too small.\n")
 			}
@@ -600,7 +598,7 @@ for(i in 1:Nreps){
 		probs <- probset2(g,sexC,mig,Nwith,Nbet)
 		psum <- sum(probs)	# Sum of all event probabilites, for drawing random time
 		if(psum <= 0 && all(sexC==0)!=1){
-			stop("Summed events are zero or negative, you need to double-check your algebra.")
+			stop("Summed events are zero or negative, you need to double-check your algebra (or probability inputs).")
 		}
 		
 		# Drawing time to next event, SCALED TO 2NT GENERATIONS
@@ -632,7 +630,6 @@ for(i in 1:Nreps){
 			event <- match(1,draw)
 			draw2 <- rmultinom(1,1,probs[event,])[,1]
 			deme <- match(1,draw2)
-			c(event,deme);
 			
 			# Based on outcome, altering states accordingly
 			ot <- stchange2(event)
@@ -657,9 +654,7 @@ for(i in 1:Nreps){
 			}
 			
 			# Changing ancestry accordingly
-			itot <- indvs
 			indvs <- coalesce(indvs,Ttot,Nwith,Nbet,deme,event,drec,e2,d)
-			indvs;
 		}
 	}
 	
