@@ -35,6 +35,9 @@ if(g < 0){
 if(theta < 0){
 	stop("Mutation rate must be a positive (or zero) value.")
 }
+if(mig < 0){
+	stop("Migration rate must be a positive (or zero) value.")
+}
 if(d <= 0){
 	stop("Number of demes has to be a positive integer")
 }

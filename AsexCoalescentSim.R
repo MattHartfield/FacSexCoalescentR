@@ -42,6 +42,9 @@ if(g > (10/Na)){
 if(theta < 0){
 	stop("Mutation rate must be a positive (or zero) value.")
 }
+if(mig < 0){
+	stop("Migration rate must be a positive (or zero) value.")
+}
 if(mig > (10/Na)){
 	cat("WARNING: Analytical transitions assume migration is weak.\n")
 	cat("Current input is much larger than O(1/NT) - transitions may be inaccurate.\n")
