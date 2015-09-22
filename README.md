@@ -82,7 +82,7 @@ Each command is defined as follows: highlighted are changes in parameters compar
 
 - GC is the *scaled* rate of gene conversion, *i.e. equal to 2Ng where g is the unscaled probability of gene conversion*.
 - Theta is the net neutral mutation rate, 4 N mu. Used to determine neutral diversity along the genealogy.
-- ‘SwitchingType’ is a command to determine what kind of temporal heterogeneity in sex rates are present, if at all. The input has to be one of 0, 1, or 2. The definitions are the same as in the full simulation.
+- 'SwitchingType' is a command to determine what kind of temporal heterogeneity in sex rates are present, if at all. The input has to be one of 0, 1, or 2. The definitions are the same as in the full simulation.
 - If SwitchingType = 0, i.e. changing sex between two values, then pLH is the *scaled rate (in time units of 2N generations)* of switching from the low-sex state to high-sex state. *For example, a value of pLH = 2 will mean that the rate of sex will change every N generations, on average. This is different from the previous simulation, where this value was defined as a probability instead*. The other cases of pLH (for SwitchingType = 1, 2) are defined as in the full simulation.
 - pHL is defined if SwitchingType = 0. It is the *rate (in 2N generations)* of switching from the high-sex state to low-sex state. Otherwise it is not used.
 - M = 2Nm is the net migration rate between demes, for m between 0 and 1. Defined as in the full simulation.
@@ -94,7 +94,7 @@ A simple example:
 
 Rscript AsexCoalescentSim_LowSex.R 0 5 2 0 0 0 1 25 0 2 0 1000
 
-runs 1000 coalescent simulations with 25 within-indivdual initial samples, with 2Nsigma = 2 (i.e. unscaled sigma = 1/N), no gene conversion and theta = 5.
+This command runs 1000 coalescent simulations with 25 within-indivdual initial samples, with 2Nsigma = 2 (i.e. unscaled sigma = 1/N), no gene conversion and theta = 5.
 
 CONTACT
 
