@@ -16,7 +16,8 @@ args <- commandArgs(trailingOnly = TRUE)
 ## Variables:
 ## THE FIRST EIGHT are: Nt; gen. conv.; theta; initial state; low->high sex prob; high->low sex prob; net migration rate; # demes.
 Na <- as.integer(args[1])	# Population size
-g <- as.double (args[2])	# Rate of gene conversion
+g <- as.double (args[2])	# Rate of gene conversion (2 NT g)
+g <- g/(2*Na)				# Rescaling GC for probability transitions
 theta <- as.double(args[3])	# Rate of mutation (4 NT mu)
 pSTIN <- as.double(args[4])	# What to do (0=changing sex, 1=stepwise change, 2 = constant sex)
 pLH <- as.double(args[5])	# Prob of low-sex to high-sex transition OR time of transition if stepwise change
@@ -32,8 +33,8 @@ if(d == 1){
 if(Na <= 0){
 	stop("Total Population size N is zero or negative, not allowed.")
 }
-if(g < 0 || g > 1){
-	stop("Rate of gene conversion has to lie between 0 and 1.")
+if(g < 0){
+	stop("Rate of gene conversion must be a positive (or zero) value.")
 }
 if(g > (10/Na)){
 	cat("WARNING: Analytical transitions assume gene conversion is weak.\n")
@@ -728,7 +729,13 @@ for(i in 1:Nreps){
 		}else if(psum == 0){
 			tjump <- Inf
 		}else{
-			tjump <- rexp(1, rate = psum*(2*Na*d))
+			tjump <- NA			
+			while(is.na(tjump) == 1){
+				tjump <- (rgeom(1, psum/(1+psum)))/(2*Na*d)
+				if(is.na(tjump) == 1){
+					cat("WARNING: Main jump time was set to NA - transition probabilities may be too small.\n")
+				}
+			}
 		}
 		NextT <- (Ttot + tjump)
 		
