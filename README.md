@@ -11,7 +11,7 @@ Rscript AsexCoalescentSim.R N GC Theta SwitchingType pLH pHL M Demes [Rates per 
 Each command is defined as follows:
 
 - N is the population size of the ENTIRE population. So if there are d demes, there are N/d individuals per deme. Make sure that N/d is an integer!
-- GC is rate of gene conversion, between 0 and 1.
+- GC is the scaled rate of gene conversion, i.e. equal to 2Ng where g is the unscaled probability of gene conversion.
 - Theta is the net neutral mutation rate, 4Nmu. Used to determine neutral diversity along the genealogy.
 - 'SwitchingType' is a command to determine what kind of temporal heterogeneity in sex rates are present, if at all. The input has to be one of 0, 1, or 2.
 	- 0 indicates transitions between two rates of sex over time ('Temporal change' in rates of sex). In this case, the initial rate of sex is determined based on a weighted mean of sex rates (so the more common transition is most likely to be the current state).
@@ -80,7 +80,7 @@ Rscript AsexCoalescentSim_LowSex.R GC Theta SwitchingType pLH pHL M Demes [Rates
 
 Each command is defined as follows: highlighted are changes in parameters compared to the full simulation. The main change to bear in mind is that parameters (rather than switches) are all scaled to 2N or 4N, which is not the case with the complete simulation.
 
-- GC is the *scaled* rate of gene conversion, *i.e. equal to 2Ng where g is the unscaled probability of gene conversion*.
+- GC is the scaled rate of gene conversion, i.e. equal to 2Ng where g is the unscaled probability of gene conversion.
 - Theta is the net neutral mutation rate, 4 N mu. Used to determine neutral diversity along the genealogy.
 - 'SwitchingType' is a command to determine what kind of temporal heterogeneity in sex rates are present, if at all. The input has to be one of 0, 1, or 2. The definitions are the same as in the full simulation.
 - If SwitchingType = 0, i.e. changing sex between two values, then pLH is the *scaled rate (in time units of 2N generations)* of switching from the low-sex state to high-sex state. *For example, a value of pLH = 2 will mean that the rate of sex will change every N generations, on average. This is different from the previous simulation, where this value was defined as a probability instead*. The other cases of pLH (for SwitchingType = 1, 2) are defined as in the full simulation.
