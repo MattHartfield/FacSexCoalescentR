@@ -41,7 +41,7 @@ OUTPUT
 Output is very similar to that produced by the simulation program MS, to allow compatibility between the two. The following files are produced:
 - "Seed.out" containing the random seed used at the start of the simulation
 - "Trees.out" with NEWICK printout of the trees produced for each repetition of the simulation
-- â"CoalTimes.dat", a table listing the occurrence of the n-1 coalescent times for each repetition of the simulation (for n the number of samples present)
+- "CoalTimes.dat", a table listing the occurrence of the n-1 coalescent times for each repetition of the simulation (for n the number of samples present)
 - A folder "Mutations", where each file lists the mutation spectrum of the population. Each row represents an individual mutation, with position between 0 and 1 (column 1), followed by whether it is absent (0) or present (1) in each of the n samples.
 
 Information is also piped to STDOUT at the end of the simulation, so it is wise to redirect this to another file during execution.
@@ -88,7 +88,7 @@ Each command is defined as follows: highlighted are changes in parameters compar
 - M = 2Nm is the net migration rate between demes, for m between 0 and 1. Defined as in the full simulation.
 - Demes are the number of subpopulations present. Set to 1 to define a single panmictic population.
 
-[Rates per deme] are a set of 4*Demes parameters, which together determine how sex is defined within each deme. *Here, the rates of sex are defined in units of 2N generations. Hence a value of 2 equates to an unscaled rate of sex of 1/N in the previous simulations.*
+[Rates per deme] are a set of 4 X Demes parameters, which together determine how sex is defined within each deme. *Here, the rates of sex are defined in units of 2N generations. Hence a value of 2 equates to an unscaled rate of sex of 1/N in the previous simulations.*
 
 A simple example:
 
